@@ -60,7 +60,44 @@ static cJSON* jsonBody(httpd_req_t* req) {
 
 // ---------------- handlers ----------------
 
+// Portal provisioning page: pure HTML, zero JS — renders in ANY browser
+// (including phone captive-portal webviews that choke on JS apps).
+static const char PORTAL_HTML[] =
+"<!DOCTYPE html><html><head><meta charset=utf-8>"
+"<meta name=viewport content='width=device-width,initial-scale=1'>"
+"<title>Stack-chan setup</title><style>"
+"body{background:#f0f2f5;color:#111;font-family:system-ui,sans-serif;margin:0}"
+".box{max-width:420px;margin:40px auto;background:#fff;border:1px solid #ccc;"
+"border-radius:12px;padding:24px}"
+"h1{font-size:22px;margin:0 0 6px}p{font-size:14px;color:#555;margin:.4em 0}"
+"input{width:100%;box-sizing:border-box;padding:10px;margin:6px 0 14px;"
+"border:1px solid #bbb;border-radius:8px;font-size:16px}"
+"button{width:100%;padding:12px;background:#238636;border:0;color:#fff;"
+"border-radius:8px;font-size:16px}"
+"small{display:block;margin-top:14px;color:#888;text-align:center}"
+"</style></head><body><div class=box>"
+"<h1>&#x1f916; Stack-chan setup</h1>"
+"<p>Enter your home WiFi to connect the robot. It will save the credentials "
+"and reboot.</p>"
+"<form method=POST action=/connect>"
+"<label>WiFi name (SSID)</label><input name=ssid required maxlength=39>"
+"<label>Password</label><input name=pass type=password maxlength=64>"
+"<button type=submit>Connect</button></form>"
+"<p><small>Open <a href=/app>/app</a> for the full control panel "
+"(works after the robot is online).</small></p>"
+"</div></body></html>";
+
 static esp_err_t hRoot(httpd_req_t* req) {
+    if (wifi.state() == WifiState::ApPortal) {
+        httpd_resp_set_type(req, "text/html");
+        return httpd_resp_send(req, PORTAL_HTML, strlen(PORTAL_HTML));
+    }
+    httpd_resp_set_type(req, "text/html");
+    return httpd_resp_send(req, UI_HTML, UI_HTML_END - UI_HTML);   // embedded blob has no NUL
+}
+
+// full JS control panel, always available
+static esp_err_t hApp(httpd_req_t* req) {
     httpd_resp_set_type(req, "text/html");
     return httpd_resp_send(req, UI_HTML, UI_HTML_END - UI_HTML);   // embedded blob has no NUL
 }
@@ -452,7 +489,7 @@ void WebApp::begin() {
     if (_started) return;
     httpd_config_t hc = HTTPD_DEFAULT_CONFIG();
     hc.stack_size = 12288;
-    hc.max_uri_handlers = 24;
+    hc.max_uri_handlers = 32;
     hc.recv_wait_timeout = 5;
     hc.send_wait_timeout = 5;
     if (httpd_start(&s_httpd, &hc) != ESP_OK) {
@@ -461,6 +498,7 @@ void WebApp::begin() {
     }
     httpd_uri_t uris[] = {
         {"/", HTTP_GET, hRoot, nullptr},
+        {"/app", HTTP_GET, hApp, nullptr},
         {"/connect", HTTP_GET, hConnect, nullptr},
         {"/connect", HTTP_POST, hConnect, nullptr},
         {"/stream", HTTP_GET, hStream, nullptr},

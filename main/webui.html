@@ -28,7 +28,7 @@ if(tab=='live')m.innerHTML=`<div class=card><h3>Live camera</h3><img src=/stream
 if(tab=='chat')m.innerHTML=`<div class=card><h3>Chat <span id=cstate style=color:#8b949e></span></h3><pre id=clog style=max-height:340px>loading...</pre>
 <div class=row><input id=cmsg placeholder="Say something..."><button class=pri onclick=sendChat()>Send</button></div>
 <div class=row><label><input type=checkbox id=cphoto> attach photo</label><button onclick="hold(1)">PTT down</button><button onclick="hold(0)">PTT up</button></div></div>`;
-if(tab=='pi')m.innerHTML=`<div class=card><h3>Raspberry Pi agent</h3><pre id=pist>loading...</pre>
+if(tab=='pi'){m.innerHTML=`<div class=card><h3>Raspberry Pi agent</h3><pre id=pist>loading...</pre>
 <div class=row><input id=pcmd placeholder="uname -a"><button class=pri onclick=piexec()>Run</button></div>
 <div class=row><button onclick="piexec('uname -a')">uname</button><button onclick="piexec('free -m')">free</button><button onclick="piexec('df -h')">df</button><button onclick="piexec('vcgencmd measure_temp')">temp</button><button onclick="piexec('uptime')">uptime</button></div>
 <p>Full terminal: use the robot's Pi screen (ttyd) or open <code>http://raspberrypi.local:7681</code>.</p></div>`;pistatus()}
