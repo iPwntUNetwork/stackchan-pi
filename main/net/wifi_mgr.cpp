@@ -76,7 +76,8 @@ void WifiMgr::startPortal() {
     wc.ap.authmode = WIFI_AUTH_WPA_WPA2_PSK;
     esp_wifi_set_mode(WIFI_MODE_APSTA);
     esp_wifi_set_config(WIFI_IF_AP, &wc);
-    if (!s_netifReady) esp_wifi_start();
+    esp_wifi_start();   // idempotent if already started; REQUIRED — was previously
+                        // behind an inverted guard so the portal AP never came up
     startCaptiveDns();
     _portal = true;
     _state = WifiState::ApPortal;

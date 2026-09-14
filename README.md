@@ -101,8 +101,9 @@ the vendored `components/M5Unified`.
 
 ## First boot
 
-1. The device boots into an **AP portal** (`Stack-chan` setup) — captive DNS
-   points everything at it, open `http://192.4.2.1/` (or any URL) and enter
+1. The device boots into an **AP portal** — WiFi network **`stackchan-setup`**,
+   password **`stackchan`**. Captive DNS points everything at it, so open
+   `http://192.168.4.1/` (or any URL) and enter
    your WiFi credentials. It reboots onto your network.
 2. On the **Settings screen** (nav: Face / Chat / Pi / Cam / Set) pick the LLM
    backend and enter keys/URLs (on-screen keyboard, or the phone UI at
