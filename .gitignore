@@ -1,0 +1,20 @@
+# build output (idf.py build regenerates)
+build/
+dist/
+
+# ESP component manager — fetched from the registry, versions pinned by
+# dependencies.lock (which IS committed)
+managed_components/
+
+# generated config — sdkconfig.defaults is the source of truth
+sdkconfig
+sdkconfig.old
+
+# python
+__pycache__/
+*.pyc
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store

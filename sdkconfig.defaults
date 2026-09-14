@@ -1,0 +1,49 @@
+# ---- Stack-chan CoreS3 (ESP32-S3R8, 16 MB flash, 8 MB quad PSRAM) ----
+
+# Target CPU
+CONFIG_IDF_TARGET="esp32s3"
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+
+# Flash: 16 MB quad @ 80 MHz
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="16MB"
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+
+# PSRAM: CoreS3 = ESP32-S3R8, QUAD mode @ 80 MHz (octal does not probe on this chip)
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_QUAD=y
+CONFIG_SPIRAM_SPEED_80M=y
+CONFIG_SPIRAM_USE_MALLOC=y
+CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL=16384
+CONFIG_SPIRAM_TRY_ALLOCATE_WIFI_LWIP=y
+CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC=y
+
+# Partition table (two 3 MB OTA slots)
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+
+# Scheduling: ms-granularity loops (servo 20 ms, UI 33 ms)
+CONFIG_FREERTOS_HZ=1000
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+
+# No Bluetooth in this firmware — save ~60 KB RAM
+CONFIG_BT_ENABLED=n
+
+# Camera: GC0308 DVP on the CoreS3 mainboard.
+# Bounce mode (PSRAM_DMA=n) — direct EDMA-to-PSRAM loses the quad-PSRAM bus
+# to concurrent traffic and produces torn RGB565 frames (verified upstream).
+CONFIG_CAMERA_PSRAM_DMA=n
+CONFIG_CAMERA_DMA_BUFFER_SIZE_MAX=8192
+
+# esp_http_server: browsers send big header sets; defaults 431 on them
+CONFIG_HTTPD_MAX_URI_LEN=256
+CONFIG_HTTPD_MAX_REQ_HDR_LEN=4096
+
+# lwIP / mDNS (raspberrypi.local + our own stackchan.local)
+CONFIG_LWIP_DNS_SUPPORT_MDNS_QUERIES=y
+
+# Allow more simultaneous TLS conns (chat + pi + web)
+CONFIG_LWIP_MAX_SOCKETS=16

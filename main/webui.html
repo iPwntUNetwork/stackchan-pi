@@ -1,0 +1,63 @@
+<!DOCTYPE html><html><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Stack-chan</title><style>
+body{background:#0d1117;color:#e6edf3;font-family:system-ui,sans-serif;margin:0}
+h3{color:#58a6ff;margin:.4em 0 .2em}
+nav{display:flex;background:#161b22;position:sticky;top:0}
+nav button{flex:1;padding:12px;background:none;border:0;color:#8b949e;font-size:15px}
+nav button.on{color:#58a6ff;border-bottom:2px solid #58a6ff}
+main{padding:10px;max-width:900px;margin:auto}
+button{background:#21262d;border:1px solid #30363d;color:#e6edf3;border-radius:8px;padding:8px 14px;margin:2px}
+button.pri{background:#238636;border-color:#238636}
+button.dan{background:#da3633;border-color:#da3633}
+input,select,textarea{background:#0d1117;border:1px solid #30363d;color:#e6edf3;border-radius:8px;padding:8px;margin:2px;width:100%;box-sizing:border-box}
+img{max-width:100%;border-radius:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1;min-width:120px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:10px;margin:10px 0}
+pre{background:#010409;padding:10px;border-radius:8px;overflow:auto;white-space:pre-wrap;font-size:13px}
+label{font-size:13px;color:#8b949e}
+</style></head><body><nav id=nav></nav><main id=main></main>
+<script>
+const $=q=>document.querySelector(q);const api=(u,o)=>fetch(u,o).then(r=>r.text());
+let tab='live';
+const tabs={live:'Live',chat:'Chat',pi:'Pi',hw:'IR/NFC',cfg:'Config'};
+function nav(){let h='';for(const k in tabs)h+=`<button class="${k==tab?'on':''}" onclick="tab='${k}';render()">${tabs[k]}</button>`;$('#nav').innerHTML=h}
+async function render(){nav();const m=$('#main');
+if(tab=='live')m.innerHTML=`<div class=card><h3>Live camera</h3><img src=/stream><div class=row><button onclick="look(0,8)">Center</button><button onclick="askSee()">What do you see?</button><button onclick="location='/capture.jpg'">Snapshot</button></div>
+<div class=card><label>Pan / Tilt</label><div class=row><input id=py type=range min=-90 max=90 value=0 oninput="look(this.value,document.getElementById('pt').value)"><input id=pt type=range min=-40 max=40 value=8 oninput="look(document.getElementById('py').value,this.value)"></div></div></div>`;
+if(tab=='chat')m.innerHTML=`<div class=card><h3>Chat <span id=cstate style=color:#8b949e></span></h3><pre id=clog style=max-height:340px>loading...</pre>
+<div class=row><input id=cmsg placeholder="Say something..."><button class=pri onclick=sendChat()>Send</button></div>
+<div class=row><label><input type=checkbox id=cphoto> attach photo</label><button onclick="hold(1)">PTT down</button><button onclick="hold(0)">PTT up</button></div></div>`;
+if(tab=='pi')m.innerHTML=`<div class=card><h3>Raspberry Pi agent</h3><pre id=pist>loading...</pre>
+<div class=row><input id=pcmd placeholder="uname -a"><button class=pri onclick=piexec()>Run</button></div>
+<div class=row><button onclick="piexec('uname -a')">uname</button><button onclick="piexec('free -m')">free</button><button onclick="piexec('df -h')">df</button><button onclick="piexec('vcgencmd measure_temp')">temp</button><button onclick="piexec('uptime')">uptime</button></div>
+<p>Full terminal: use the robot's Pi screen (ttyd) or open <code>http://raspberrypi.local:7681</code>.</p></div>`;pistatus()}
+if(tab=='hw')m.innerHTML=`<div class=card><h3>IR blaster</h3><div class=row><input id=irv placeholder="NEC hex e.g. 0xFFA25D"><input id=irb placeholder=32 style=max-width:80px value=32><button class=pri onclick=irsend()>Send</button><button onclick=irlearn()>Learn (5s)</button></div><pre id=irl></pre></div>
+<div class=card><h3>NFC</h3><pre id=nfcs>loading...</pre><button onclick=render()>Refresh</button></div>
+<div class=card><h3>LEDs / Head</h3><div class=row><button onclick="api('/api/leds',{method:'POST',body:JSON.stringify({effect:2})})">Rainbow</button><button onclick="api('/api/leds',{method:'POST',body:JSON.stringify({effect:0})})">Status</button><button onclick="api('/api/leds',{method:'POST',body:JSON.stringify({effect:1})})">Off</button></div>
+<div class=row><button onclick="api('/api/servo',{method:'POST',body:JSON.stringify({cmd:'center'})})">Head center</button><button onclick="api('/api/servo',{method:'POST',body:JSON.stringify({cmd:'torque_off'})})">Torque off</button><button class=dan onclick="api('/api/servo',{method:'POST',body:JSON.stringify({cmd:'power_off'})})">Servo power off</button></div></div>`;
+if(tab=='cfg'){const c=JSON.parse(await api('/api/config'));
+m.innerHTML=`<div class=card><h3>LLM provider</h3><select id=f_provider>${['OpenAI','Gemini','Xiaozhi'].map((n,i)=>`<option value=${i} ${c.provider==i?'selected':''}>${n}</option>`).join('')}</select>
+<h3>OpenAI</h3><div class=row><input id=f_openai_key placeholder="sk-..." value="${c.openai_key||''}"><input id=f_openai_model value="${c.openai_model}" style=max-width:160px></div>
+<h3>Gemini</h3><div class=row><input id=f_gemini_key placeholder="AIza..." value="${c.gemini_key||''}"><input id=f_gemini_model value="${c.gemini_model}" style=max-width:200px></div>
+<h3>Xiaozhi</h3><div class=row><input id=f_xz_url value="${c.xz_url}"><input id=f_xz_token placeholder=token value="${c.xz_token||''}"></div>
+<h3>WiFi</h3><div class=row><input id=f_wifi_ssid placeholder=ssid value="${c.wifi_ssid||''}"><input id=f_wifi_pass type=password placeholder=password></div>
+<h3>Raspberry Pi</h3><div class=row><input id=f_pi_host value="${c.pi_host}" placeholder="raspberrypi.local or IP"><input id=f_pi_ttyd_port value="${c.pi_ttyd_port}" style=max-width:110px><input id=f_pi_agent_port value="${c.pi_agent_port}" style=max-width:110px><input id=f_pi_token placeholder="user:pass / token" value="${c.pi_token||''}"></div>
+<h3>Persona</h3><textarea id=f_persona rows=3>${c.persona}</textarea>
+<h3>Servos</h3><div class=row><input id=f_yaw_zero value="${c.yaw_zero}" style=max-width:90px><input id=f_pitch_zero value="${c.pitch_zero}" style=max-width:90px><input id=f_servo_speed value="${c.servo_speed}" style=max-width:110px><select id=f_servo_mode>${['auto','SCS bus','PWM'].map((n,i)=>`<option value=${i} ${c.servo_mode==i?'selected':''}>${n}</option>`).join('')}</select></div>
+<h3>Audio</h3><div class=row><input type=range min=0 max=100 value=${c.volume} id=f_volume><input id=f_openai_voice value="${c.openai_voice}" style=max-width:110px></div>
+<button class=pri onclick=saveCfg()>Save</button> <span id=cmsg2></span></div>`}}
+async function saveCfg(){const c={};['f_provider','f_openai_key','f_openai_model','f_gemini_key','f_gemini_model','f_xz_url','f_xz_token','f_wifi_ssid','f_wifi_pass','f_pi_host','f_pi_ttyd_port','f_pi_agent_port','f_pi_token','f_persona','f_yaw_zero','f_pitch_zero','f_servo_speed','f_servo_mode','f_volume','f_openai_voice'].forEach(id=>{const e=$('#'+id);if(e)c[id.slice(2)]=e.value});
+const r=await api('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(c)});$('#cmsg2').textContent=r}
+function look(y,p){api('/api/look',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({yaw:+y,pitch:+p})})}
+async function askSee(){const r=await api('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'What do you see right now?',photo:true})});tab='chat';render();alert(r)}
+async function sendChat(){const t=$('#cmsg').value;if(!t)return;$('#cmsg').value='';await api('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t,photo:$('#cphoto').checked})});pollChat()}
+function hold(d){api('/api/ptt',{method:'POST',body:d?'down':'up'})}
+function pollChat(){api('/api/chat/last').then(j=>{const s=JSON.parse(j);$('#clog').textContent=(s.history||[]).map(m=>(m.role=='user'?'You: ':'Chan: ')+m.text).join('\n')+'\n'+(s.partial||'');$('#cstate').textContent=s.status;if(s.status!='idle')setTimeout(pollChat,1200)}).catch(()=>{})}
+setInterval(()=>{if(tab=='chat')pollChat()},2500);
+async function pistatus(){$('#pist').textContent=await api('/api/pi/status')}
+function piexec(c){const cmd=c||$('#pcmd').value;api('/api/pi/exec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cmd})}).then(r=>$('#pist').textContent=r)}
+function irsend(){api('/api/ir',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({value:parseInt($('#irv').value),bits:+$('#irb').value||32})}).then(r=>$('#irl').textContent=r)}
+function irlearn(){api('/api/ir',{method:'POST',body:'learn'}).then(()=>{$('#irl').textContent='learning...';setTimeout(async()=>{$('#irl').textContent=await api('/api/ir/poll')},5500)})}
+render();
+</script></body></html>

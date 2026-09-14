@@ -1,0 +1,16 @@
+[Unit]
+Description=Stack-chan agent (REST bridge for the CoreS3 firmware)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Environment=STACKCHAN_TOKEN=stackchan
+Environment=STACKCHAN_PORT=8765
+ExecStart=/usr/bin/python3 /home/pi/stackchan_agent.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

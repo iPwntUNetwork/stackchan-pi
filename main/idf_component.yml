@@ -1,0 +1,11 @@
+dependencies:
+  # GC0308 DVP camera driver (CoreS3 mainboard camera)
+  espressif/esp32-camera: "^2.0.15"
+  # WebSocket client (ttyd terminal + xiaozhi voice)
+  espressif/esp_websocket_client: "^1.2.3"
+  # Opus encoder/decoder (xiaozhi realtime voice)
+  espressif/esp_audio_codec: "^2.5.0"
+  # WS2812 (cat-ear LED chain, optional)
+  espressif/led_strip: "^3.0"
+  # mDNS (raspberrypi.local resolution + stackchan.local advertisement)
+  espressif/mdns: "^1.4"

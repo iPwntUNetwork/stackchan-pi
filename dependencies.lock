@@ -1,0 +1,86 @@
+dependencies:
+  espressif/esp32-camera:
+    component_hash: bc9c8a6b51df777a014fa295825b3de5069bc0300c317acff20c97cf4a10ac7d
+    dependencies:
+    - name: espressif/esp_jpeg
+      registry_url: https://components.espressif.com
+      require: public
+      version: ^1.3.1
+    - name: idf
+      require: private
+      version: '>=5.1'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 2.1.7
+  espressif/esp_audio_codec:
+    component_hash: a5b9275af74247e3ce536d16a7080e4d77207a185b63e1bea368eb4d57176c2b
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=4.4'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 2.6.2
+  espressif/esp_jpeg:
+    component_hash: defb83669293cbf86d0fa86b475ba5517aceed04ed70db435388c151ab37b5d7
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com
+      type: service
+    version: 1.3.1
+  espressif/esp_websocket_client:
+    component_hash: dc00233af846f3a744ada283a300e0d586040aadc3ee67361645ecdce4523672
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.8.0
+  espressif/led_strip:
+    component_hash: 28621486f77229aaf81c71f5e15d6fbf36c2949cf11094e07090593e659e7639
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 3.0.3
+  espressif/mdns:
+    component_hash: 3ba256ac95e07c274be53cbd73f06cb846c403b61e8fbdf1be57bdb79db7a63e
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.12.0
+  idf:
+    source:
+      type: idf
+    version: 5.5.4
+  m5stack/m5gfx:
+    component_hash: a0d59be99d469d0144bacf0ddf420cdd2a3328f6c392f074b590b56c20b84763
+    dependencies: []
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 0.2.28
+direct_dependencies:
+- espressif/esp32-camera
+- espressif/esp_audio_codec
+- espressif/esp_websocket_client
+- espressif/led_strip
+- espressif/mdns
+- m5stack/m5gfx
+manifest_hash: 940e1d6d77f26d554bdb2a39c3bd909a295d148e611eba443d5575bac529287d
+target: esp32s3
+version: 2.0.0
